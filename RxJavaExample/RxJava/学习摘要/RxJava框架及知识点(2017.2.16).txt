@@ -1,0 +1,186 @@
+2017-2-16日  -- 2017-3-5日
+------------------------------------------------
+目录：
+1. 配置RxJava
+2. RxJava中几个对象的关系
+3. 操作符组合
+------------------------------------------------
+1. 配置RxJava
+    compile 'io.reactivex:rxjava:1.2.7'
+2. RxJava中几个对象的关系
+    Observable(观察者):相当于蒸馍的
+        |
+        |---Subscriber(订阅者):相当于吃馍的
+        |
+        |---Subscriber(订阅者):相当于第二个吃馍的
+
+    Observable
+        |
+        |---Subscriber.onNext():蒸了一个馍，吃了
+        |
+        |---Subscriber.onNext():蒸了一个馍，吃了
+        |
+        |---Subscriber.onCompleted():面用完了，蒸不出来了
+        |---Subscriber.onError():面坏了，蒸不了
+
+3. 操作符组合
+    操作符
+        |
+        |---创建操作(CreateOperation)
+        |       |
+        |       |---From[将其他种类的对象或数据类型转换为Observable]
+        |       |
+        |       |---Interval[按照一个特定的时间间隔发送整数序列的Observable]
+        |       |
+        |       |---Just[类似于From,支持[1,  10]个参数]
+        |       |
+        |       |---Range[发送特定整数序列的Observable,大小间隔为1]
+        |       |
+        |       |---Repeat[和别的一起使用，无法自己创建一个Observable][发射特定数据重复多次的Observable]
+        |       |
+        |       |---Timer[类似于定时器][在特定时间延迟后发射一个特殊的值(数字0)]
+        |
+        |
+        |---变换操作(TransformationOperation)
+        |       |
+        |       |---Buffer[定期收集Observable的数据放进一个数据包裹，然后发射这些数据包裹][根据数据量/时间等条件]
+        |       |
+        |       |---FlatMap[将原始Observable发出的数据进行转换加工，生成另一个Observable][再由这个Observable发出]
+        |       |
+        |       |---Group[将原始Observable发出的数据进行分组，每一组有一个新的Observable发出][分组后的数据也可以进行转换加工]
+        |       |
+        |       |---Map[将原始Observable发出的数据进行转换加工成为另外的数据]
+        |       |
+        |       |---Scan[将原始发出的数据通过一个函数得到结果后连结果和下一个原始数据传递下去]
+        |       |
+        |       |---Window[和Buffer类似][只不过Window是生成一个Observable，再由Observable发出这组缓存数据]
+        |
+        |
+        |---过滤操作(FilterOperational)
+        |       |
+        |       |---Debounce[过滤掉间隔时间比较短的数据项]
+        |       |
+        |       |---Distinct[过滤重复的数据项][可以自定义去重的对比字段]
+        |       |
+        |       |---ElementAt[取第几个数据项发出]
+        |       |
+        |       |---Filter[自定义过滤方法，显示返回true的数据项]
+        |       |
+        |       |---First[只发射第一项数据或满足条件的第一项数据]
+        |       |---Last [只发射最后一项数据或满足条件的最后一项的数据]
+        |       |
+        |       |---IgnoreElements[忽略掉数据信号，只发送onError和onCompleted]
+        |       |
+        |       |---Sample[在原始发射信号的Observable中，采集Observable每发出一个信号，将两个采集信号中间离的时间最近的原始信号进行发出]
+        |       |
+        |       |---Skip    [抑制(跳过)前几个信号，或跳过前面一段时间的信号]
+        |       |---SkipLast[抑制(跳过)后几个信号，或跳过后面一段时间的信号]
+        |       |
+        |       |---Take    [发射前几个信号，或发射前面一段时间的信号]
+        |       |---TakeLast[发射后几个信号，或发射后面一段时间的信号]
+        |
+        |
+        |---组合操作(CombinedOperation)
+        |       |
+        |       |---CombineLatest[合并多个(2-9或者数组)Observable发出的信号，将多个Observable最近(最新发出的)通过自定义的方法进行合并并发出]
+        |       |
+        |       |---Join[原始的Observable以自己的频率发射数据项，另外一个Observable每发出一个新的数据项，和原始Observable已发出的数据项进行一一组合，再进行发出]
+        |       |
+        |       |---Merge[按顺序合并多个Observable发出的数据项][有可能会交叉]
+        |       |
+        |       |---StartWith[在原始Observable发出的数据序列之前插入数据项]
+        |       |
+        |       |---Zip[按顺序合并多个Observable发出的数据项][发出的数据项一一对应每一个数据进行合并后发出]
+        |
+        |
+        |---错误处理(ErrorOperation)
+        |       |
+        |       |---Catch[包含操作符[onErrorReturn][onErrorResumeNext][onExceptionResumeNext]][收到异常进行其他处理]
+        |       |
+        |       |---Retry[包含操作符[retry][retryWhen]][重试或自定义重试时机]
+        |
+        |
+        |---辅助操作(AuxiliaryOperation)
+        |       |
+        |       |---Delay[延迟一段时间再发射原始的Observable][和timer的区别为：timer是延迟一段时间后发射一个信号，而Delay是延迟一段时间处理一个数据流(Observable)]
+        |       |
+        |       |---Do[DoOnEach][DoOnNext][DoOnError][DoOnCompleted][DoOnTerminate][DoOnSubscribe][DoOnUnSubscribe]
+        |       |
+        |       |---Materialize[将原始Observable发出的信号和事件转换为Notification再发出]
+        |       |
+        |       |---ObserveOn[更改观察者(onNext)执行的线程]
+        |       |
+        |       |---Serialize[强制Observable发出的信号按照规则发出][例如“不会出现onError之后还会有onNext的信号]
+        |       |
+        |       |---SubscribeOn[更改被观察者(call)执行的线程]
+        |       |
+        |       |---TimeInterval[将原始Observable发射的信号转换成带着上一次信号和这一次信号的间隔时间的信号]
+        |       |
+        |       |---Timeout[给原始Observable发射的信号加上超时处理，当超时时会提示异常或执行别的操作]
+        |       |
+        |       |---Timestamp[给原始Observable发射的信号加上时间戳，然后再发出]
+        |       |
+        |       |---Using[创建一个只在Observable生命周期存在的一次性资源]
+        |       |
+        |       |---To[将原始Observable的数据转换成List、Map等]
+        |
+        |
+        |---条件和布尔操作(ConditionsAndBooleanOperation)
+        |       |
+        |       |---All[判断][判断原始Observable发出的信号是否都满足这个条件]
+        |       |
+        |       |---Amb[条件][两个或多个Observable发出信号最早的会被发出，其他的进行抛弃]
+        |       |
+        |       |---Contains[判断][原始Observable发出的信号是否存在该信号]
+        |       |
+        |       |---DefaultIfEmpty[条件][如果原始Observable没有发出信号，那就发出默认的信号]
+        |       |
+        |       |---Exists[判断][原始Observable发出的信号中是否存在满足该条件的信号]
+        |       |
+        |       |---IsEmpty[判断][原始Observable是否没有发出一个信号]
+        |       |
+        |       |---SequenceEqual[判断][判断两个Observable发出的信号是否一致][可以自定义判断条件]
+        |       |
+        |       |---SkipUntil[条件][直到第二个Observable发出信号时，丢弃第一个Observable之前发出的]
+        |       |
+        |       |---SkipWhile[条件][直到“不满足”自定义条件时，丢弃第一个Observable之前发出]
+        |       |
+        |       |---TakeUntil[条件][直到第二个Observable发出信号时，只取第一个Observable之前发出的]
+        |       |
+        |       |---TakeWhile[条件][直到“不满足”自定义条件后，丢弃后面的数据，只取之前的]
+        |
+        |
+        |---算数和聚合操作符(ArithmeticAndAggregationOperation)
+        |       |
+        |       |---Average[RxJava-Math][计算][求原始Observable发射项的平均值]
+        |       |
+        |       |---Max[RxJava-Math][计算][求原始Observable发射项的最大值]
+        |       |
+        |       |---Min[RxJava-Math][计算][求原始Observable发射项的最小值]
+        |       |
+        |       |---Sum[RxJava-Math][计算][求原始Observable发射项的和]
+        |       |
+        |       |---Collect[聚合][将原始Observable收集成一个数据结构(例如：ArrayList)]
+        |       |
+        |       |---Concat[聚合][将两个或多个Observable不交替合并在一起发出]
+        |       |
+        |       |---Count[计算][计算原始Observable发射信号的数量]
+        |       |
+        |       |---Reduce[计算][类似于Scan][将前两个信号计算出来的结果传递给下一个并继续计算]
+        |
+        |
+        |---字符串操作(StringOperation)【RxJava-String】
+        |       |
+        |       |---ByLine[将原始的Observable转换成一个行序列的Observable，按换行符分割]
+        |       |
+        |       |---Decode[将原始的Observable发出的字节数组进行按照一定形式解码]
+        |       |
+        |       |---Encode[将原始的Observable发出的字符串进行按照一定形式编码]
+        |       |
+        |       |---From[将一个字符流或Reader转换为一个发射字节数组或字符串的Observable]
+        |       |
+        |       |---Join[将原始Observable发出的字符串信号用固定的字符串“拼接”成为一个进行发射]
+        |       |
+        |       |---Split[将原始Observable发射的字符串信号进行“分割”]
+        |       |
+        |       |---StringConcat[将原始Observable发射的字符串序列信号连接起来进行发射]
